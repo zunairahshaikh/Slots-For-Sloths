@@ -545,5 +545,11 @@ public:
         } while (choice != 7);
     }
 };
+int main()
+{
+    BookingSystem system;
+    system.run();
+    return 0;
+}
 
 
