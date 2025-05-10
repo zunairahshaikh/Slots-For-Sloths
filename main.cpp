@@ -546,9 +546,4 @@ public:
     }
 };
 
-int main()
-{
-    BookingSystem system;
-    system.run();
-    return 0;
-}
+
