@@ -474,7 +474,7 @@ public:
 
         Location *facility = locations[index - 1];
 
-        cout << "\n==== BOOKINGS FOR " << facility->getName() << " ====\n";
+        cout << "\nBOOKINGS FOR " << facility->getName() << "\n";
 
         bool anyBooking = false;
         for (const auto &dayEntry : facility->getBookings())
@@ -502,7 +502,7 @@ public:
         int choice;
         do
         {
-            cout << "\n=== CAMPUS FACILITY BOOKING SYSTEM ===\n";
+            cout << "\nCAMPUS FACILITY BOOKING SYSTEM\n";
             cout << "1. View Facilities\n";
             cout << "2. Book Facility\n";
             cout << "3. Unbook Facility\n";
