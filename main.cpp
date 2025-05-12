@@ -10,7 +10,7 @@
 
 using namespace std;
 
-// --- Utility Functions ---
+//funcs
 string toLower(string str)
 {
     transform(str.begin(), str.end(), str.begin(), ::tolower);
@@ -30,15 +30,14 @@ T *findFacilityByName(vector<T *> &facilities, const string &name)
     return nullptr;
 }
 
-const vector<string> VALID_DAYS = {
-    "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"};
+const vector<string> VALID_DAYS = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"};
 
 bool isValidDay(const string &day)
 {
     return find(VALID_DAYS.begin(), VALID_DAYS.end(), toLower(day)) != VALID_DAYS.end();
 }
 
-// --- Struct for Booking Information ---
+//booking info struct
 struct BookingInfo
 {
     string facilityName;
@@ -46,7 +45,8 @@ struct BookingInfo
     int slot;
 };
 
-// --- Location Base Class ---
+//classes
+//base class
 class Location
 {
 protected:
@@ -58,8 +58,7 @@ protected:
     static int facilityCount;
 
 public:
-    Location(string n, int cap, int open, int close)
-        : name(n), capacity(cap), openSlot(open), closeSlot(close)
+    Location(string n, int cap, int open, int close) : name(n), capacity(cap), openSlot(open), closeSlot(close)
     {
         facilityCount++;
     }
@@ -165,8 +164,8 @@ ostream &operator<<(ostream &out, const Location &loc)
     return out;
 }
 
-// --- Derived Classes ---
-class Library : public virtual Location
+//child classes
+class Library : public virtual Location //virtual inheritance to solve diamond problem
 {
     int studyCarrels;
 
@@ -187,8 +186,7 @@ class Cafe : public virtual Location
     string menuType;
 
 public:
-    Cafe(string n, int cap, string menu, int open, int close)
-        : Location(n, cap, open, close), menuType(menu) {}
+    Cafe(string n, int cap, string menu, int open, int close): Location(n, cap, open, close), menuType(menu) {}
 
     void displayFullDetails() const override
     {
@@ -203,8 +201,7 @@ class SportsFacility : public virtual Location
     string sportType;
 
 public:
-    SportsFacility(string n, int cap, string sport, int open, int close)
-        : Location(n, cap, open, close), sportType(sport) {}
+    SportsFacility(string n, int cap, string sport, int open, int close) : Location(n, cap, open, close), sportType(sport) {}
 
     void displayFullDetails() const override
     {
@@ -217,10 +214,7 @@ public:
 class SportsCafe : public SportsFacility, public Cafe
 {
 public:
-    SportsCafe(string n, int cap, string sport, string menu, int open, int close)
-        : Location(n, cap, open, close),
-          SportsFacility(n, cap, sport, open, close),
-          Cafe(n, cap, menu, open, close) {}
+    SportsCafe(string n, int cap, string sport, string menu, int open, int close) : Location(n, cap, open, close), SportsFacility(n, cap, sport, open, close), Cafe(n, cap, menu, open, close) {}
 
     void displayFullDetails() const override
     {
@@ -232,7 +226,7 @@ public:
     string getType() const override { return "Sports Cafe"; }
 };
 
-// --- Booking System ---
+//system class
 class BookingSystem
 {
     vector<Location *> locations;
@@ -332,7 +326,7 @@ public:
 
     void displayFacilities()
     {
-        cout << "\n==== Available Facilities ====\n";
+        cout << "\nAvailable Facilities\n";
         for (size_t i = 0; i < locations.size(); i++)
         {
             cout << i + 1 << ". " << *locations[i] << endl;
