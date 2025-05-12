@@ -7,23 +7,20 @@
 #include <algorithm>
 #include <iomanip>
 #include <limits>
+#include <stdexcept>
 
 using namespace std;
 
 //funcs
-string toLower(string str)
-{
+string toLower(string str){
     transform(str.begin(), str.end(), str.begin(), ::tolower);
     return str;
 }
 
 template <typename T>
-T *findFacilityByName(vector<T *> &facilities, const string &name)
-{
-    for (auto facility : facilities)
-    {
-        if (toLower(facility->getName()) == toLower(name))
-        {
+T *findFacilityByName(vector<T *> &facilities, const string &name) {
+    for (auto facility : facilities){
+        if (toLower(facility->getName()) == toLower(name)){
             return facility;
         }
     }
@@ -32,8 +29,7 @@ T *findFacilityByName(vector<T *> &facilities, const string &name)
 
 const vector<string> VALID_DAYS = {"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"};
 
-bool isValidDay(const string &day)
-{
+bool isValidDay(const string &day){
     return find(VALID_DAYS.begin(), VALID_DAYS.end(), toLower(day)) != VALID_DAYS.end();
 }
 
@@ -46,9 +42,7 @@ struct BookingInfo
 };
 
 //classes
-//base class
-class Location
-{
+class Location{
 protected:
     string name;
     int capacity;
@@ -84,10 +78,10 @@ public:
 
     void setCapacity(int cap)
     {
-        this->capacity = cap; // using this pointer
+        this->capacity = cap;
     }
 
-    bool checkAvailability(const string &day, int slot) const
+    bool checkAvailability(const string &day, int slot)const
     {
         string lowercaseDay = toLower(day);
         auto it = bookings.find(lowercaseDay);
@@ -105,16 +99,12 @@ public:
         return true;
     }
 
-    bool unbookSlot(const string &day, int slot)
-    {
+    bool unbookSlot(const string &day, int slot){
         string lowercaseDay = toLower(day);
         auto it = bookings.find(lowercaseDay);
-        if (it != bookings.end())
-        {
-            if (it->second.erase(slot))
-            {
-                if (it->second.empty())
-                {
+        if (it != bookings.end()){
+            if (it->second.erase(slot)){
+                if (it->second.empty()){
                     bookings.erase(it);
                 }
                 return true;
@@ -133,13 +123,10 @@ public:
         }
     }
 
-    void saveBookings(ofstream &outFile) const
-    {
-        for (const auto &dayEntry : bookings)
-        {
+    void saveBookings(ofstream &outFile) const {
+        for (const auto &dayEntry : bookings){
             string day = dayEntry.first;
-            for (int slot : dayEntry.second)
-            {
+            for (int slot :dayEntry.second){
                 outFile << name << "," << day << "," << slot << "\n";
             }
         }
@@ -150,28 +137,26 @@ public:
         bookings[toLower(day)].insert(slot);
     }
 
-    map<string, set<int>> getBookings() const
+    map<string, set<int>> getBookings()const
     {
         return bookings;
     }
 };
 
-int Location::facilityCount = 0;
+int Location::facilityCount= 0;
 
-ostream &operator<<(ostream &out, const Location &loc)
-{
+ostream &operator<<(ostream &out, const Location &loc){
     out << loc.name << " (" << loc.getType() << ") - Capacity: " << loc.capacity;
     return out;
 }
 
 //child classes
-class Library : public virtual Location //virtual inheritance to solve diamond problem
+class Library : public virtual Location
 {
     int studyCarrels;
 
 public:
-    Library(string n, int cap, int carrels, int open, int close)
-        : Location(n, cap, open, close), studyCarrels(carrels) {}
+    Library(string n, int cap, int carrels, int open, int close): Location(n, cap, open, close), studyCarrels(carrels) {}
 
     void displayFullDetails() const override
     {
@@ -186,7 +171,7 @@ class Cafe : public virtual Location
     string menuType;
 
 public:
-    Cafe(string n, int cap, string menu, int open, int close): Location(n, cap, open, close), menuType(menu) {}
+    Cafe(string n, int cap, string menu, int open, int close) : Location(n, cap, open, close), menuType(menu) {}
 
     void displayFullDetails() const override
     {
@@ -214,7 +199,7 @@ public:
 class SportsCafe : public SportsFacility, public Cafe
 {
 public:
-    SportsCafe(string n, int cap, string sport, string menu, int open, int close) : Location(n, cap, open, close), SportsFacility(n, cap, sport, open, close), Cafe(n, cap, menu, open, close) {}
+    SportsCafe(string n, int cap, string sport, string menu, int open, int close): Location(n, cap, open, close), SportsFacility(n, cap, sport, open, close), Cafe(n, cap, menu, open, close) {}
 
     void displayFullDetails() const override
     {
@@ -223,10 +208,10 @@ public:
              << "Menu: " << Cafe::getType() << endl;
     }
 
-    string getType() const override { return "Sports Cafe"; }
+    string getType() const override {return "Sports Cafe";}
 };
 
-//system class
+//final booking system
 class BookingSystem
 {
     vector<Location *> locations;
@@ -294,34 +279,48 @@ public:
 
     void loadBookingsFromFile()
     {
-        ifstream inFile("bookings.txt");
-        if (!inFile)
+        try
         {
-            cout << "No previous bookings found.\n";
-            return;
-        }
+            ifstream inFile("bookings.txt");
+            if (!inFile.is_open())
+                throw runtime_error("Error opening bookings file.");
 
-        string facilityName, day;
-        int slot;
-        while (getline(inFile, facilityName, ',') &&
-               getline(inFile, day, ',') &&
-               inFile >> slot)
-        {
-            inFile.ignore();
-            Location *loc = findFacilityByName(locations, facilityName);
-            if (loc)
+            string facilityName, day;
+            int slot;
+            while (getline(inFile, facilityName, ',') &&
+                   getline(inFile, day, ',') &&
+                   inFile >> slot)
             {
-                loc->loadBooking(day, slot);
+                inFile.ignore();
+                Location *loc = findFacilityByName(locations, facilityName);
+                if (loc)
+                {
+                    loc->loadBooking(day, slot);
+                }
             }
+            cout << "Previous bookings loaded!\n";
         }
-        cout << "Previous bookings loaded!\n";
+        catch (const exception &e)
+        {
+            cerr << "Exception: " << e.what() << endl;
+        }
     }
 
     void saveBookingsToFile()
     {
-        ofstream outFile("bookings.txt");
-        for (auto loc : locations)
-            loc->saveBookings(outFile);
+        try
+        {
+            ofstream outFile("bookings.txt");
+            if (!outFile.is_open())
+                throw runtime_error("Error writing to bookings file.");
+
+            for (auto loc : locations)
+                loc->saveBookings(outFile);
+        }
+        catch (const exception &e)
+        {
+            cerr << "Exception: " << e.what() << endl;
+        }
     }
 
     void displayFacilities()
@@ -412,8 +411,7 @@ public:
         Location *facility = locations[index - 1];
 
         string oldDay;
-        do
-        {
+        do{
             oldDay = getStringInputCancelable("Enter current booked day (or 0 to cancel): ");
             if (oldDay == "CANCEL")
                 return;
@@ -539,11 +537,9 @@ public:
         } while (choice != 7);
     }
 };
-int main()
-{
+
+int main(){
     BookingSystem system;
     system.run();
     return 0;
 }
-
-
